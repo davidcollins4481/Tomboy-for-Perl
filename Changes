@@ -1,0 +1,6 @@
+Revision history for Perl extension Tomboy.
+
+0.01  Sun Sep 27 23:56:23 2009
+	- original version; created by h2xs 1.23 with options
+		-AXc -n Tomboy
+
