@@ -42,6 +42,9 @@ our $aliases = {
     'exists' => 'NoteExists',
     'delete' => 'DeleteNote',
     'title'  => 'GetNoteTitle',
+    'content' => 'GetNoteContents',
+    'createdDate' => 'GetNoteCreateDate',
+    'changedDate' => 'GetNoteChangeDate',
 };
 
 sub new {
@@ -66,15 +69,14 @@ sub new {
 
 sub _createNote {
     my ($self, $obj, $args) = @_;
-    $DB::single = 1;
-    # TODO: create this through the Tomboy OBJ
-    $$self{uri} = $obj->CreateNote();
-
-    my $note_content = $$args{title};
-    $note_content .= "\n" if $note_content;
-    $note_content .= $$args{content};
+    my $note_title = $$args{title};
     
-    $obj->SetNoteContents($$self{uri}, $note_content);
+    # TODO: create this through the Tomboy OBJ
+    $$self{uri} = $obj->CreateNamedNote($note_title);
+
+    die "Could not create note with title: $note_title\n" if !$$self{uri};
+    $obj->DisplayNote($$self{uri});
+    $obj->SetNoteContents($$self{uri}, $note_title . "\n\n" . $$args{content});
 }
 
 sub AUTOLOAD {
