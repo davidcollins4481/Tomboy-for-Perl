@@ -55,9 +55,6 @@ if ($answer eq "y") {
     is($$tags[0], $note_tag, "Retrieve tag for created note");
     is($note->GetNoteTitle, $note_name, "Retrieve title for created note");
 
-    #$note->SetNoteContents($note_content);
-    #is($note->GetNoteContents, $note_content, "Retrieve content for created note");
-    
     # clean up
     $note->DeleteNote;
 } else {

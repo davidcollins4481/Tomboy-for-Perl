@@ -41,7 +41,7 @@ my $uri;
     is($note->title, $title, "Title is same as it was initialized with");
     is($note->uri, $uri, "Note uri is same as it was initialized with");
     # clean up
-    #ok($note->delete, "Deleting note");
-    #ok(!$note->exists, "Note does not exist");
+    ok($note->delete, "Deleting note");
+    ok(!$note->exists, "Note does not exist");
 }
 

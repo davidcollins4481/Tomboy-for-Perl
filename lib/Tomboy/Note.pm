@@ -70,13 +70,15 @@ sub new {
 sub _createNote {
     my ($self, $obj, $args) = @_;
     my $note_title = $$args{title};
-    
+    my $note_content = $$args{content};
     # TODO: create this through the Tomboy OBJ
     $$self{uri} = $obj->CreateNamedNote($note_title);
-
     die "Could not create note with title: $note_title\n" if !$$self{uri};
-    $obj->DisplayNote($$self{uri});
-    $obj->SetNoteContents($$self{uri}, $note_title . "\n\n" . $$args{content});
+    
+    # currently a Tomboy bug preventing SetNoteContents from working via DBus
+    # without displaying the note
+    # https://bugzilla.gnome.org/show_bug.cgi?id=553062    
+    $obj->SetNoteContentsXml($$self{uri},qq|<note-content version="0.1">$note_title\n\n$note_content</note-content>|);
 }
 
 sub AUTOLOAD {
