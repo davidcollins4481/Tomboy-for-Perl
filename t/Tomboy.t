@@ -6,6 +6,7 @@ use Test::More qw(no_plan);
 BEGIN { use_ok('Tomboy') };
 
 # Move these to a config file?
+my $note_title = "Tomboy.pm testing title";
 my $note_name = "Tomboy.pm testing";
 my $note_tag = "testing";
 my $search_keyword = "tomboymodule";
@@ -42,21 +43,23 @@ if ($answer eq "y") {
     # for permission to create another note :-(
     my ($note, $tags);
     
-    $note = $tomboy->CreateNamedNote($note_name);
+    $note = Tomboy::Note->new({
+        title => $note_title,
+        content => $note_content,
+    });
     
     isa_ok($note, "Tomboy::Note", "Initial note creation successful");
     
-    $note->AddTagToNote($note_tag);
-    $tags = $note->GetTagsForNote;
+    $note->addTag($note_tag);
+    $tags = $note->getTags;
 
     my $notes = $tomboy->GetAllNotesWithTag($note_tag);
-    is($$notes[0]->GetNoteTitle, $note_name, "Retrieve created note by tag");
+    is($$notes[0]->title, $note_title, "Retrieve created note by tag");
         
     is($$tags[0], $note_tag, "Retrieve tag for created note");
-    is($note->GetNoteTitle, $note_name, "Retrieve title for created note");
 
     # clean up
-    $note->DeleteNote;
+    $note->delete;
 } else {
     print "Ok...use at your own peril\n";
 }

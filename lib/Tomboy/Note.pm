@@ -39,12 +39,14 @@ our $white_list = {
 
 # for calls that feel a bit more comfortable
 our $aliases = {
-    'exists' => 'NoteExists',
-    'delete' => 'DeleteNote',
-    'title'  => 'GetNoteTitle',
+    'addTag' => 'AddTagToNote',
     'content' => 'GetNoteContents',
     'createdDate' => 'GetNoteCreateDate',
     'changedDate' => 'GetNoteChangeDate',
+    'delete' => 'DeleteNote',
+    'exists' => 'NoteExists',
+    'getTags' => 'GetTagsForNote',
+    'title'  => 'GetNoteTitle',
 };
 
 sub new {
