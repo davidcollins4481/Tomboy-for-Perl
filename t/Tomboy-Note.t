@@ -45,3 +45,35 @@ my $uri;
     ok(!$note->exists, "Note does not exist");
 }
 
+__END__
+
+
+API methods that go in here:
+maybe just use these internally?
+CreateNote
+CreateNamedNote
+
+methods to wrap:
+
+(to take advantage of class properties such as the uri and avoid passing
+per individial api call) is uri first param for all of these
+
+HideNote
+DisplayNote
+NoteExists
+GetNoteChangeDate
+GetNoteCreateDate
+GetNoteTitle
+DeleteNote
+GetNoteContents
+GetNoteContentsXml
+GetNoteCompleteXml
+SetNoteContents
+SetNoteContentsXml
+SetNoteCompleteXml
+GetTagsForNote
+AddTagToNote
+RemoveTagFromNote
+NoteDeleted (?)
+NoteAdded (?)
+NoteSaved (?)

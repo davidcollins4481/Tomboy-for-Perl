@@ -26,6 +26,7 @@ my $total_notes = $tomboy->ListAllNotes;
 ok(scalar(@$total_notes), "User has notes (total=" . scalar(@$total_notes) .")");
 
 $uri = $$total_notes[0]->uri;
+
 like($uri, qr{^note://tomboy/[\d\w-]*}, "Note uri format");
 
 like($tomboy->FindStartHereNote, qr{^note://tomboy/[\d\w-]*}, "Found Start Note Uri");
@@ -42,7 +43,6 @@ if ($answer eq "y") {
     # just don't want to have to prompt the user again
     # for permission to create another note :-(
     my ($note, $tags);
-    
     $note = Tomboy::Note->new({
         title => $note_title,
         content => $note_content,
@@ -53,11 +53,18 @@ if ($answer eq "y") {
     $note->addTag($note_tag);
     $tags = $note->getTags;
 
-    my $notes = $tomboy->GetAllNotesWithTag($note_tag);
+    my $notes = $tomboy->getAllNotesWithTag($note_tag);
     is($$notes[0]->title, $note_title, "Retrieve created note by tag");
         
     is($$tags[0], $note_tag, "Retrieve tag for created note");
 
+    my $find_note = $tomboy->findNote($note_title);
+    isa_ok($find_note, "Tomboy::Note", "Created note found searching");
+    is($find_note->title, $note_title, "Retrieve created note with find");
+
+    my $search_notes = $tomboy->searchNotes($search_keyword, 0);
+    is($$search_notes[0]->title, $note_title, "Retrieve created note with search");
+    
     # clean up
     $note->delete;
 } else {
@@ -84,8 +91,7 @@ creating a new note?
 
     - DisplayNoteWithSearch
     - FindNote
-    - CreateNote
-    - CreateNamedNote
+
     - DisplaySearch
     - DisplaySearchWithText
     - GetAllNotesWithTag

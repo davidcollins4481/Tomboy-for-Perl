@@ -7,11 +7,15 @@ use warnings;
 use Tomboy::Note;
 our $VERSION = '0.01';
 
+our $blacklist = {
+    'CreateNote'      => 1,
+    'CreateNamedNote' => 1,
+};
+
 our $white_list = {
     'Version'               => 1,
     'Introspect'            => 1,
     'DisplayNoteWithSearch' => 1,
-    'FindNote'              => 1,
     'FindStartHereNote'     => 1,
     'DisplaySearch'         => 1,
     'DisplaySearchWithText' => 1,
@@ -21,12 +25,23 @@ our $white_list = {
         'ListAllNotes'       => 1,
         'GetAllNotesWithTag' => 1,
         'SearchNotes'        => 1,
+        'FindNote'           => 1,
     },
     '__creation' => {
         'CreateNote'            => 1,
         'CreateNamedNote'       => 1,
     }
 };
+
+# for calls that feel a bit more comfortable
+our $aliases = {
+    'findNote'              => 'FindNote',
+    'searchNotes'           => 'SearchNotes',
+    'getAllNotesWithTag'    => 'GetAllNotesWithTag',
+    'findStartHereNote'     => 'FindStartHereNote',
+    'listAllNotes'          => 'ListAllNotes',
+};
+
 
 sub new {
     my ($class,$args) = @_;
@@ -44,6 +59,12 @@ sub AUTOLOAD {
     our ($AUTOLOAD);
     my $method = $AUTOLOAD;
     $method =~ s/.*:://;
+    
+    # check for an alias
+    if (my $unaliased = $$aliases{$method}) {
+        $method = $unaliased;
+    }
+    
     # TODO: is this going to work or am i going to have
     # to further differentiate between methods that return
     # nothing and methods that have return values?
@@ -53,18 +74,24 @@ sub AUTOLOAD {
     my $processedMethods = $$white_list{'__processArgs'};
     if ($$processedMethods{$method}) {
         # prepare the arguments
-        my $notes = [];
+        my $result = [];
         
         if (@args) {
             # passing an array like this looks ugly
             # but it allows the values within it
             # to each be passed as seperate arguments
-            $notes = $self->{_obj}->$method(@args);
+            $result = $self->{_obj}->$method(@args);
         } else {
-            $notes = $self->{_obj}->$method;
+            $result = $self->{_obj}->$method;
         }
-        
-        return [ map { Tomboy::Note->new({ uri => $_ }) } @$notes ];
+
+        # need to process result a bit
+        if (ref($result)) {
+            return [ map { Tomboy::Note->new({ uri => $_ }) } @$result ];
+        } elsif ($result =~ qr{^note://tomboy/[\d\w-]*}) {
+            # a single uri
+            return Tomboy::Note->new({ uri => $result });
+        }
     }
 
     # Creation methods
@@ -84,23 +111,30 @@ sub AUTOLOAD {
 1;
 __END__
 
-Reference:
-http://arstechnica.com/open-source/news/2007/09/using-the-tomboy-d-bus-interface.ars
+=head1 NAME
 
-Methods to be supported in this class:
+Tomboy - Perl API to access Tomboy functionality through DBus
 
-Version
-Introspect
-DisplayNoteWithSearch (?)
-FindNote (?)
-FindStartHereNote (?)
-CreateNote
-CreateNamedNote
-DisplaySearch
-DisplaySearchWithText
+=head1 SYNOPSIS
 
-Methods To wrap (return obj version of results as Tomboy::Note):
+my $tomboy = Tomboy->new;
 
-ListAllNotes (?)
-GetAllNotesWithTag
-SearchNotes
+my $total_notes = $tomboy->ListAllNotes;
+
+$uri = $$total_notes[0]->uri;
+
+ref($$total_notes[0]); # Tomboy::Note
+
+my $notes = $tomboy->GetAllNotesWithTag($note_tag);
+
+my $case_sensitive = 0;
+my $search_notes = $tomboy->searchNotes("search term", $case_sensitive);
+
+=head1 DESCRIPTION
+
+This class is meant to go with Tomboy::Note. Note manipulation should be done there.
+Tomboy MUST be installed to use this. This module uses DBus to access Tomboy's functionality. 
+This module has NOT been tested on Windows or Mac. Software is still in development
+so please back up notes before using just to be safe. 
+
+=cut
